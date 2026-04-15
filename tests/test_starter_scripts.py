@@ -27,6 +27,46 @@ def run_wsl(command: str) -> subprocess.CompletedProcess[str]:
 
 
 class StarterScriptTests(unittest.TestCase):
+    def test_bootstrap_handles_template_stub_directory(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp_dir_raw:
+            tmp_dir = Path(tmp_dir_raw)
+            source_repo = tmp_dir / "source-repo"
+            source_repo.mkdir()
+            (source_repo / "train_gpt.py").write_text("print('ok')\n", encoding="utf-8")
+            (source_repo / "requirements.txt").write_text("torch\n", encoding="utf-8")
+
+            init_output = run_wsl(
+                "cd {repo} && "
+                "git init -b main >/dev/null && "
+                "git add . && "
+                "git -c user.name=Test -c user.email=test@example.com commit -m init >/dev/null".format(
+                    repo=to_wsl(source_repo),
+                )
+            )
+            self.assertEqual(init_output.returncode, 0, init_output.stderr)
+
+            workspace_dir = tmp_dir / "workspace"
+            parameter_golf_dir = workspace_dir / "parameter-golf"
+            parameter_golf_dir.mkdir(parents=True)
+            (parameter_golf_dir / "requirements.txt").write_text("torch\n", encoding="utf-8")
+
+            output = run_wsl(
+                "cd {repo} && "
+                "REPO_URL={source_repo} "
+                "WORKSPACE_DIR={workspace} "
+                "PARAMETER_GOLF_DIR={parameter_golf} "
+                "bash scripts/bootstrap_parameter_golf.sh".format(
+                    repo=to_wsl(REPO_ROOT),
+                    source_repo=to_wsl(source_repo),
+                    workspace=to_wsl(workspace_dir),
+                    parameter_golf=to_wsl(parameter_golf_dir),
+                )
+            )
+
+            self.assertEqual(output.returncode, 0, output.stderr)
+            self.assertTrue((parameter_golf_dir / ".git").is_dir())
+            self.assertTrue((parameter_golf_dir / "train_gpt.py").is_file())
+
     def test_run_smoke_8xh100_dry_run_prints_expected_commands(self) -> None:
         with tempfile.TemporaryDirectory() as tmp_dir_raw:
             tmp_dir = Path(tmp_dir_raw)

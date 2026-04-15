@@ -31,6 +31,17 @@ need_cmd python3
 
 run mkdir -p "$WORKSPACE_DIR"
 
+if [[ -d "$PARAMETER_GOLF_DIR" && ! -d "$PARAMETER_GOLF_DIR/.git" ]]; then
+  existing_entry_count="$(find "$PARAMETER_GOLF_DIR" -mindepth 1 -maxdepth 1 | wc -l | tr -d ' ')"
+  if [[ "$existing_entry_count" == "1" && -f "$PARAMETER_GOLF_DIR/requirements.txt" ]]; then
+    run rm -f "$PARAMETER_GOLF_DIR/requirements.txt"
+  elif [[ "$existing_entry_count" != "0" ]]; then
+    echo "Target directory exists and is not a git checkout: $PARAMETER_GOLF_DIR" >&2
+    echo "If this is intentional, move it aside or set PARAMETER_GOLF_DIR to a clean path." >&2
+    exit 1
+  fi
+fi
+
 if [[ ! -d "$PARAMETER_GOLF_DIR/.git" ]]; then
   run git clone "$REPO_URL" "$PARAMETER_GOLF_DIR"
 fi
@@ -53,4 +64,3 @@ Tips:
   - Set USE_VENV=1 if you are not using the official RunPod template image.
   - Set DRY_RUN=1 to print commands without executing them.
 EOF
-
