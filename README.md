@@ -6,6 +6,7 @@ This repo is for people who want the fastest path from a fresh RunPod pod to:
 
 - cloning the official challenge repo,
 - downloading the published FineWeb cache,
+- proving the pod is healthy before a longer run,
 - running a baseline on `1x H100`,
 - rerunning the same shape on `8x H100`,
 - scaffolding a record folder for a later PR.
@@ -24,8 +25,12 @@ The official `parameter-golf` README is good, but it mixes challenge rules, lead
 
 - `scripts/bootstrap_parameter_golf.sh`
   - clones `openai/parameter-golf` into `/workspace/parameter-golf` by default
+- `scripts/preflight_pod.sh`
+  - checks whether the pod has the required tools, GPU visibility, and challenge files
 - `scripts/download_data.sh`
   - downloads the cached FineWeb export for the selected tokenizer variant
+- `scripts/run_smoke_1xh100.sh`
+  - one-command bootstrap + `1` train shard + short `1x H100` smoke run
 - `scripts/run_baseline_1xh100.sh`
   - runs a single-GPU baseline that mirrors the official quickstart shape
 - `scripts/run_baseline_8xh100.sh`
@@ -39,8 +44,13 @@ The official `parameter-golf` README is good, but it mixes challenge rules, lead
 git clone https://github.com/Bortlesboat/parameter-golf-runpod-starter.git
 cd parameter-golf-runpod-starter
 
-bash scripts/bootstrap_parameter_golf.sh
-bash scripts/download_data.sh
+bash scripts/preflight_pod.sh
+bash scripts/run_smoke_1xh100.sh
+```
+
+If the smoke run looks healthy, move to the full single-GPU baseline:
+
+```bash
 bash scripts/run_baseline_1xh100.sh
 ```
 
@@ -64,6 +74,12 @@ bash scripts/scaffold_record_dir.sh
 
 - These scripts assume the challenge repo layout stays close to the current `main` branch.
 - They intentionally do not try to hide the official commands; the goal is to make them repeatable.
+- The smoke flow is tuned to catch setup mistakes cheaply:
+  - `TRAIN_SHARDS=1`
+  - `MAX_WALLCLOCK_SECONDS=120`
+  - `TRAIN_LOG_EVERY=20`
+  - `VAL_LOSS_EVERY=50`
+- On April 15, 2026 this repo was live-validated on the official RunPod `Parameter Golf` template on `1x H100`.
 - For submission-size validation and sweep automation, see the companion repos:
   - `https://github.com/Bortlesboat/parameter-golf-size-checker`
   - `https://github.com/Bortlesboat/parameter-golf-sweeps`
