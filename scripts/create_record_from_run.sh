@@ -28,7 +28,7 @@ TRACK="$TRACK" \
   GITHUB_ID="$GITHUB_ID" \
   BLURB="$BLURB" \
   PARAMETER_GOLF_DIR="$PARAMETER_GOLF_DIR" \
-  "$SCRIPT_DIR/scaffold_record_dir.sh"
+  bash "$SCRIPT_DIR/scaffold_record_dir.sh"
 
 RECORD_DIR="$PARAMETER_GOLF_DIR/records/$TRACK/${DATE_STAMP}_${SLUG}"
 cp "$LOG_SOURCE" "$RECORD_DIR/train.log"

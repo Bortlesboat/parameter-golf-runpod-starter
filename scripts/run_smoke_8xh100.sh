@@ -19,21 +19,21 @@ if [[ "$SKIP_PREFLIGHT" != "1" ]]; then
     WORKSPACE_DIR="$WORKSPACE_DIR" \
     PARAMETER_GOLF_DIR="$PARAMETER_GOLF_DIR" \
     VARIANT="$VARIANT" \
-    "$SCRIPT_DIR/preflight_pod.sh"
+    bash "$SCRIPT_DIR/preflight_pod.sh"
 fi
 
 echo "==> bootstrap"
 DRY_RUN="$DRY_RUN" \
   WORKSPACE_DIR="$WORKSPACE_DIR" \
   PARAMETER_GOLF_DIR="$PARAMETER_GOLF_DIR" \
-  "$SCRIPT_DIR/bootstrap_parameter_golf.sh"
+  bash "$SCRIPT_DIR/bootstrap_parameter_golf.sh"
 
 echo "==> download_data"
 DRY_RUN="$DRY_RUN" \
   PARAMETER_GOLF_DIR="$PARAMETER_GOLF_DIR" \
   VARIANT="$VARIANT" \
   TRAIN_SHARDS="$TRAIN_SHARDS" \
-  "$SCRIPT_DIR/download_data.sh"
+  bash "$SCRIPT_DIR/download_data.sh"
 
 echo "==> train_smoke"
 DRY_RUN="$DRY_RUN" \
@@ -44,7 +44,7 @@ DRY_RUN="$DRY_RUN" \
   TRAIN_LOG_EVERY="$TRAIN_LOG_EVERY" \
   VAL_LOSS_EVERY="$VAL_LOSS_EVERY" \
   NPROC_PER_NODE=8 \
-  "$SCRIPT_DIR/run_baseline_8xh100.sh"
+  bash "$SCRIPT_DIR/run_baseline_8xh100.sh"
 
 cat <<EOF
 8x smoke run launched with:
