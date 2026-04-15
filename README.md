@@ -31,12 +31,16 @@ The official `parameter-golf` README is good, but it mixes challenge rules, lead
   - downloads the cached FineWeb export for the selected tokenizer variant
 - `scripts/run_smoke_1xh100.sh`
   - one-command bootstrap + `1` train shard + short `1x H100` smoke run
+- `scripts/run_smoke_8xh100.sh`
+  - one-command bootstrap + `1` train shard + short `8x H100` distributed smoke run
 - `scripts/run_baseline_1xh100.sh`
   - runs a single-GPU baseline that mirrors the official quickstart shape
 - `scripts/run_baseline_8xh100.sh`
   - runs an `8x H100` baseline with the record-track wallclock cap
 - `scripts/scaffold_record_dir.sh`
   - creates a record folder with placeholder metadata and copies the current `train_gpt.py`
+- `scripts/create_record_from_run.sh`
+  - turns a completed `RUN_ID` into a record-style folder and copies in the train log
 
 ## Quickstart
 
@@ -57,7 +61,15 @@ bash scripts/run_baseline_1xh100.sh
 When you're ready for a real record-track run:
 
 ```bash
+bash scripts/preflight_pod.sh
+bash scripts/run_smoke_8xh100.sh
 bash scripts/run_baseline_8xh100.sh
+```
+
+After a successful run, assemble a submission-style folder:
+
+```bash
+RUN_ID=smoke_sp1024_8gpu bash scripts/create_record_from_run.sh
 ```
 
 To scaffold a submission folder after a run:
@@ -79,6 +91,11 @@ bash scripts/scaffold_record_dir.sh
   - `MAX_WALLCLOCK_SECONDS=120`
   - `TRAIN_LOG_EVERY=20`
   - `VAL_LOSS_EVERY=50`
+- The `8x` smoke flow is tuned for distributed-path validation rather than leaderboard quality:
+  - `TRAIN_SHARDS=1`
+  - `MAX_WALLCLOCK_SECONDS=120`
+  - `TRAIN_LOG_EVERY=10`
+  - `VAL_LOSS_EVERY=20`
 - On April 15, 2026 this repo was live-validated on the official RunPod `Parameter Golf` template on `1x H100`.
 - For submission-size validation and sweep automation, see the companion repos:
   - `https://github.com/Bortlesboat/parameter-golf-size-checker`
